@@ -1,4 +1,4 @@
-[
+const factoryABI = [
     {
         "inputs": [
             {
@@ -211,3 +211,4 @@
         "type": "function"
     }
 ]
+export {factoryABI};

@@ -971,3 +971,5 @@ const RouterABI= [
         "type": "receive"
     }
 ] as const
+
+export { RouterABI };

@@ -15,6 +15,6 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true
   },
-  "include": ["scripts/**/*", "src/**/*"],
+  "include": ["scripts/**/*", "src/**/*", "src/utils/wallet-management/env-loader.ts", "src/utils/wallet-management/key-utils.ts"],
   "exclude": ["node_modules", "dist"]
 } 

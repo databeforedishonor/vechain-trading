@@ -1,161 +1,260 @@
-# VeChain DEX Trader
+# VeChain DEX Trading Bot Framework
 
-A JavaScript library for interacting with decentralized exchanges (DEXes) on the VeChain blockchain.
+A TypeScript/JavaScript framework for building automated trading bots on the VeChain blockchain. This project provides the infrastructure and examples to help teams quickly implement DEX trading strategies.
 
 ## Overview
 
-This project provides tools for:
+This framework provides tools for:
 
-1. Querying price quotes from VeChain DEXes using the `getAmountsIn` and `getAmountsOut` functions
-2. Comparing rates across multiple DEXes to find the best price
-3. Executing swaps between VET, VTHO, and other tokens
-4. Finding active DEX contracts on the VeChain network
+1. Real-time blockchain monitoring for trading opportunities
+2. Creating trading strategies with custom decision algorithms
+3. Executing trades across VeChain DEX (based on Uniswap V2 architecture)
+4. Token approvals, swap execution, and balance management 
+5. Price comparison across multiple DEXes to find the best execution price
 
-The implementation is based on Uniswap V2 architecture, which is used by most DEXes on VeChain.
+## Bot Architecture
 
-## Project Structure
-
-The project is organized into the following directories:
+The trading bot consists of the following key components:
 
 ```
 vechain-ai-trading-repo/
-├── config/             # ABI files and configuration
-├── docs/               # Documentation and reports
-│   └── reports/        # Analysis reports and summaries
-├── examples/           # Example usage scripts
-├── scripts/            # Categorized scripts
-│   ├── balances/       # Balance checking utilities
-│   ├── contracts/      # Contract interaction utilities
-│   ├── queries/        # Blockchain query scripts
-│   ├── quotes/         # Price quote utilities
-│   ├── swaps/          # Token swap scripts
-│   ├── tests/          # Test scripts
-│   └── utils/          # General utility scripts
-└── src/                # Core source code
-    ├── api/            # API implementations
-    ├── core/           # Core functionality
-    └── utils/          # Utility functions
+├── config/                 # Configuration files and ABIs
+├── src/
+│   ├── core/               # Core trading functionality
+│   │   ├── monitoring/     # Blockchain monitoring components
+│   │   │   └── trading-bot.ts     # Main trading bot implementation
+│   │   ├── tokens/         # Token management (balances, approvals)
+│   │   │   ├── token-balances.ts  # Check token balances
+│   │   │   └── erc20-approve.ts   # Approve tokens for trading
+│   │   └── trading/        # Trading strategies and execution
+│   │       ├── market-data.ts     # Price monitoring and ratio calculation
+│   │       ├── swap-executor.ts   # Trade execution logic
+│   │       └── strategy-simulator.ts # Trade decision simulation
+│   ├── examples/           # Example implementations
+│   │   ├── contract-reader-example.ts # Example of reading contract data
+│   │   └── contract-writer-example.ts # Example of writing to contracts
+│   ├── types/              # TypeScript type definitions
+│   └── utils/              # Utility functions
+│       ├── contracts/      # Contract interaction utilities
+│       │   ├── contract-reader.ts # Read from contracts
+│       │   └── contract-writer.ts # Write to contracts
+│       └── wallet-management/     # Wallet management utilities
+│           └── env-loader.ts      # Environment configuration
+└── scripts/                # Legacy scripts (being migrated)
 ```
 
-## Components
+## Quick Start
 
-### 1. Price Quote Utilities (`scripts/quotes/`)
+### 1. Environment Setup
 
-Tools for getting price quotes from VeChain DEXes:
-
-- `vechain-dex-quote.js`: Core module with quote functions
-- `price-quotes.js`: Example script showing price quote usage
-
-Key functions:
-- `getExactInputQuote`: Get the expected output amount for a given input amount
-- `getExactOutputQuote`: Get the required input amount for a desired output amount
-- `getBestQuote`: Compare rates across multiple DEXes to find the best price
-
-### 2. Swap Scripts (`scripts/swaps/`)
-
-Scripts for executing token swaps on VeChain:
-
-- `vet-vtho-swap.js`: Swap between VET and VTHO tokens
-- `vechain-vet-vtho-swap.js`: Alternative implementation for VET/VTHO swaps
-
-### 3. Blockchain Query Tools (`scripts/queries/`)
-
-Tools for scanning and querying the VeChain blockchain:
-
-- `find-dex-contracts.js`: Scan for active DEX contracts
-- `query-testnet.js`: Query the VeChain testnet for information
-
-### 4. Balance Utilities (`scripts/balances/`)
-
-Scripts for checking token balances:
-
-- `vechain-check-balances.js`: Check VET and VTHO balances
-- `get-balances.js`: Simple balance checker
-- `get-vet-vtho-amounts.js`: Get detailed VET/VTHO amounts
-
-### 5. Testing Scripts (`scripts/tests/`)
-
-Various test scripts for different components:
-
-- `test-router-quotes.js`: Test DEX router quote functions
-- `test-verocket.js`: Test VeRocket DEX functionality
-- `test-wallet.js`: Test wallet generation and management
-
-## Technical Details
-
-### Function Signatures
-
-The implementation uses the standard Uniswap V2 function signatures:
+Create a `.env` file with the following parameters:
 
 ```
-getAmountsOut(uint amountIn, address[] memory path) returns (uint[] memory amounts)
-// Function signature: 0xd06ca61f
-
-getAmountsIn(uint amountOut, address[] memory path) returns (uint[] memory amounts)
-// Function signature: 0x1f00ca74
+NETWORK=testnet        # or mainnet
+PRIVATE_KEY=your_private_key_here  # OR
+MNEMONIC=your_seed_phrase_here
 ```
 
-### ABI Encoding/Decoding
+### 2. Install Dependencies
 
-The library includes utilities for:
+```bash
+npm install
+```
 
-1. Encoding function calls according to the Ethereum ABI specification
-2. Decoding returned arrays of token amounts
-3. Handling contract call errors gracefully
+### 3. Run the Trading Bot
 
-## Usage Examples
+```bash
+# Start the trading bot with automatic monitoring and trading
+npm run start-trading-bot
+# OR
+npm run bot:start
+```
 
-### Getting a Price Quote
+## Bot Components
 
-```javascript
-const { getExactInputQuote, ADDRESSES } = require('./scripts/quotes/vechain-dex-quote');
+### 1. Trading Bot (`src/core/monitoring/trading-bot.ts`)
 
-async function getQuote() {
-  // Get quote for 1 vVET to VTHO
-  const amountIn = '1000000000000000000'; // 1 vVET (18 decimals)
-  const path = [ADDRESSES.vVET, ADDRESSES.VTHO];
-  
-  const quote = await getExactInputQuote(ADDRESSES.VEROCKET_ROUTER, amountIn, path);
-  console.log(`Quote: ${quote.formatted}`);
-  console.log(`Price: ${quote.priceFormatted}`);
+The core of the trading bot that:
+- Connects to VeChain blockchain
+- Monitors for new blocks
+- Triggers trading decisions on each new block
+- Executes trades when decision criteria are met
+
+Configuration options:
+```typescript
+// Configure at the top of trading-bot.ts
+let EXECUTE_REAL_TRADES = true;   // Set to false for simulation only
+const SLIPPAGE_TOLERANCE = 5;     // Slippage tolerance percentage
+```
+
+### 2. Market Data (`src/core/trading/market-data.ts`)
+
+Monitors DEX prices and ratios:
+- Retrieves real-time token pricing from DEXes
+- Calculates trading ratios
+- Provides price data for decision making
+
+### 3. Trade Decision Engine (`src/core/trading/strategy-simulator.ts`)
+
+Determines whether to execute a trade based on:
+- Current market conditions
+- Custom trading strategy logic
+- Configurable probability parameters
+
+To customize the trade decision logic:
+1. Modify the `simulateTradingDecision()` function
+2. Implement your own strategy in place of the `decideToTrade()` function
+3. Adjust trading parameters in `market-data.ts`
+
+### 4. Trading Executor (`src/core/trading/swap-executor.ts`)
+
+Handles the execution flow:
+1. Token approvals (when needed)
+2. Slippage protection
+3. Transaction submission and monitoring
+4. Error handling and reporting
+
+## Token Management
+
+### Token Balances (`src/core/tokens/token-balances.ts`)
+
+Check token balances for any ERC20 tokens or native VET/VTHO:
+
+```bash
+# Check token balance
+npm run token:balance -- [wallet_address] [token_address]
+# OR 
+npx ts-node src/core/tokens/token-balances.ts [wallet_address] [token_address]
+```
+
+### Token Approvals (`src/core/tokens/erc20-approve.ts`)
+
+Before trading, tokens must be approved for DEX router contracts:
+
+```bash
+# Run token approval script directly
+npm run token:approve -- [spender_address] [amount]
+# OR
+npx ts-node src/core/tokens/erc20-approve.ts [spender_address] [amount]
+```
+
+## Contract Interaction Utilities
+
+### Contract Reader (`src/utils/contracts/contract-reader.ts`)
+
+The contract reader allows you to:
+1. Create reusable contract interfaces for reading data
+2. Make method calls to view/pure functions
+3. Retrieve token balances and other contract data
+
+Example:
+```bash
+# Run example contract read operations
+npm run contract:read
+# OR
+npx ts-node src/examples/contract-reader-example.ts
+```
+
+### Contract Writer (`src/utils/contracts/contract-writer.ts`)
+
+The contract writer allows you to:
+1. Create transaction clauses for contract interactions
+2. Execute transactions with proper signing
+3. Approve tokens and execute swaps
+
+Example:
+```bash
+# Run example contract write operations
+npm run contract:write
+# OR
+npx ts-node src/examples/contract-writer-example.ts
+```
+
+## Customizing the Trading Bot
+
+### Trading Parameters
+
+Modify the following parameters in `src/core/trading/market-data.ts` to adjust trading behavior:
+
+```typescript
+// DEX Router address (update for your target DEX)
+const DEX_ROUTER_ADDRESS = '0x91e42759290239a62ac757cf85bb5b74ace57927';
+
+// Token addresses
+const vVET_ADDRESS = '0x86fb5343bbecffc86185c023a2a6ccc76fc0afd8';
+
+// Trading parameters
+const TRADE_AMOUNT_VTHO = '10000000000000000000'; // 10 VTHO
+const TRADE_PROBABILITY = 0.3; // 30% chance to trade on each block
+```
+
+### Custom Trading Strategy
+
+To implement your own trading strategy:
+
+1. Create a new module in `src/core/trading/strategies/` folder
+2. Implement your decision algorithm that returns a boolean (trade/no trade)
+3. Integrate your strategy in `strategy-simulator.ts`
+
+Example custom strategy integration:
+
+```typescript
+// In your custom strategy file
+export function myCustomStrategy(priceRatio: PriceRatio): boolean {
+  // Implement your logic here
+  return priceRatio.vetPerVtho > 0.1; // Example threshold
 }
+
+// In strategy-simulator.ts
+import { myCustomStrategy } from './strategies/my-strategy';
+
+// Replace this line:
+const shouldTrade = decideToTrade(ratio);
+// With:
+const shouldTrade = myCustomStrategy(ratio);
 ```
 
-### Checking Balances
+### Continuous Trading
 
-```javascript
-// Import the balance checker
-const checkBalances = require('./scripts/balances/get-balances');
+By default, the bot disables trading after a successful trade. To enable continuous trading:
 
-// Check balances for an address
-const address = '0x7567D83b7b8d80ADdCb281A71d54Fc7B3364ffed';
-checkBalances(address).then(balances => {
-  console.log(`VET: ${balances.vet}`);
-  console.log(`VTHO: ${balances.vtho}`);
-});
+1. Open `src/core/monitoring/trading-bot.ts`
+2. Find the line: `EXECUTE_REAL_TRADES = false;`  
+3. Comment out this line to allow continuous trading
+
+## Testing and Simulation
+
+Run in simulation mode to test without executing real trades:
+
+```bash
+# Modify the EXECUTE_REAL_TRADES flag in trading-bot.ts
+let EXECUTE_REAL_TRADES = false;
+
+# Then run the trading bot
+npm run bot:start
 ```
 
-### Executing a Swap
+Test individual components:
+```bash
+# Test price monitoring
+npm run market:data
+# OR
+npx ts-node src/core/trading/market-data.ts
 
-```javascript
-// Import the swap script
-const { executeSwap } = require('./scripts/swaps/vet-vtho-swap');
-
-// Execute a swap from VET to VTHO
-const wallet = { /* wallet details */ };
-const amountIn = '1000000000000000000'; // 1 VET
-executeSwap(connex, wallet, ADDRESSES.VET, ADDRESSES.VTHO, amountIn)
-  .then(receipt => {
-    console.log(`Swap completed. Transaction ID: ${receipt.id}`);
-  });
+# Test trading decision simulation
+npm run strategy:test
+# OR
+npx ts-node src/core/trading/strategy-simulator.ts
 ```
+
+## Security Best Practices
+
+1. Never hardcode private keys in your code
+2. Use environment variables for sensitive data
+3. Test extensively on testnet before mainnet deployment
+4. Implement circuit breakers and safety thresholds
+5. Start with small trade amounts and gradually increase
 
 ## Resources
-
 - [VeChain Documentation](https://docs.vechain.org/)
-- [VeChain Thor Devkit](https://github.com/vechain/thor-devkit.js)
-- [Connex Framework](https://github.com/vechain/connex)
-
-## License
-
-This project is licensed under the MIT License. 
+- [VeChain GitHub](https://github.com/vechain)

@@ -1,4 +1,4 @@
-[
+const pairABI  = [   
     {
         "inputs": [],
         "payable": false,
@@ -894,3 +894,4 @@
         "type": "function"
     }
 ]
+export {pairABI};

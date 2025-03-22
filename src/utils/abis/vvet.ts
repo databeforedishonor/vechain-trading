@@ -1,4 +1,4 @@
-[
+const vVETABI= [
     {
         "anonymous": false,
         "inputs": [
@@ -399,4 +399,5 @@
         "stateMutability": "payable",
         "type": "receive"
     }
-]
+]   
+export {vVETABI};
